@@ -1,7 +1,7 @@
 const express=require('express')
 const dotenv=require('dotenv')
 const cors=require ('cors')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 dotenv.config()
 
 const uri = process.env.MONGODB_URI;
@@ -27,13 +27,23 @@ async function run() {
     const db=client.db("ridenest")
     const carCollection=db.collection("car")
 
-    app.post('/car',async(req,res)=>{
+    app.get('/cars',async(req,res)=>{
+        const result=await carCollection.find().toArray()
+        res.json(result);
+    })
+
+    app.post('/cars',async(req,res)=>{
         const carData=req.body
        const result=await carCollection.insertOne(carData)
 
        res.json(result)
     })
 
+    app.get('/explore-cars/:id',async(req,res)=>{
+      const {id}=req.params
+      const result= await carCollection.findOne({_id:new ObjectId(id)})
+      res.json(result)
+    })
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
