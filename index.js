@@ -26,10 +26,15 @@ async function run() {
 
     const db=client.db("ridenest")
     const carCollection=db.collection("car")
+    const AllCarCollection=db.collection("all-cars")
     const bookingCollection=db.collection("bookings")
 
     app.get('/cars',async(req,res)=>{
         const result=await carCollection.find().toArray()
+        res.json(result);
+    })
+    app.get('/all-cars',async(req,res)=>{
+        const result=await AllCarCollection.find().toArray()
         res.json(result);
     })
 
@@ -40,9 +45,9 @@ async function run() {
        res.json(result)
     })
 
-    app.get('/explore-cars/:id',async(req,res)=>{
+    app.get('/all-cars/:id',async(req,res)=>{
       const {id}=req.params
-      const result= await carCollection.findOne({_id:new ObjectId(id)})
+      const result= await AllCarCollection.findOne({_id:new ObjectId(id)})
       res.json(result)
     })
 
@@ -74,6 +79,14 @@ async function run() {
        const result=await bookingCollection.insertOne(bookingData)
 
        res.json(result)
+    })
+    
+    app.delete('/booking/:_id',async(req,res)=>{
+      const {_id}=req.params
+      const result=await bookingCollection.deleteOne(
+        {_id:_id}
+      )
+      res.json(result)
     })
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
