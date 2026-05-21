@@ -26,6 +26,7 @@ async function run() {
 
     const db=client.db("ridenest")
     const carCollection=db.collection("car")
+    const bookingCollection=db.collection("bookings")
 
     app.get('/cars',async(req,res)=>{
         const result=await carCollection.find().toArray()
@@ -61,6 +62,18 @@ async function run() {
         {_id:new ObjectId(id)}
       )
       res.json(result)
+    })
+       app.get('/booking/:userId',async(req,res)=>{
+      const {userId}=req.params
+      const result= await carCollection.find({userId});
+      res.json(result)
+    })
+
+      app.post('/booking',async(req,res)=>{
+        const bookingData=req.body
+       const result=await bookingCollection.insertOne(bookingData)
+
+       res.json(result)
     })
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
