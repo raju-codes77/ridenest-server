@@ -64,8 +64,8 @@ async function run() {
       res.json(result)
     })
        app.get('/booking/:userId',async(req,res)=>{
-      const {userId}=req.params
-      const result= await carCollection.find({userId});
+      const {userId}=req.params;
+      const result= await bookingCollection.find({userId:userId}).toArray();
       res.json(result)
     })
 
