@@ -2,6 +2,7 @@ const express=require('express')
 const dotenv=require('dotenv')
 const cors=require ('cors')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { createRemoteJWKSet, jwtVerify } = require('jose-cjs');
 dotenv.config()
 
 const uri = process.env.MONGODB_URI;
@@ -18,7 +19,27 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
+const JWKS=createRemoteJWKSet(
+  new URL("http://localhost:3000/api/auth/jwks")
+)
+//middle
+const verifyToken=async(req,res,next)=>{
+  const authHeader=req?.headers?.authorization
+  if(!authHeader){
+    return res.status(401).json({message:"unauthorized"});
+  }
+  const token=authHeader.split(" ")[1]
+  if(!token){
+        return res.status(401).json({message:"unauthorized"});
 
+  }
+
+  try{const {paylload}=await jwtVerify(token,JWKS)
+  next()
+}catch(error){
+  return res.status(403).json*=({message:""})
+}
+}
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -51,7 +72,7 @@ async function run() {
       res.json(result)
     })
 
-   app.patch('/explore-cars/:id',async(req,res)=>{
+   app.patch('/explore-cars/:id',verifyToken,async(req,res)=>{
       const {id}=req.params
       const updatedData= req.body
       const result=await carCollection.updateOne(
